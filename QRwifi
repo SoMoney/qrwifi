@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
 Package: QRwifi
-Version: 1.0.2
-AUthor: Michael Zietlow
+Version: 1.0.3
+Author: Michael Zietlow
 Description: Python script which places a QRCODE over an image.
 """
 
@@ -13,45 +13,57 @@ import sys
 import argparse
 
 ###############################################
-## Script: WIFI QR IMAGE GENERATOR WITH GRID OVERLAY
+## Script: WIFI QR IMAGE GENERATOR WITH 7x7 GRID OVERLAY
 ## <Ubuntu Prerequisites>
 ## sudo apt install -y python3 python3-pip python3-venv
 ## pip install qrcode Pillow
 ##
-## Grid System:
-##   A B C D E F
-## 1 . . . . . .
-## 2 . . . . . .
-## 3 . . . . . .
-## 4 . . . . . .
-## 5 . . . . . .
+## Grid System (7x7 with True Center):
+##   A B C D E F G
+## 1 . . . . . . .
+## 2 . . . . . . .
+## 3 . . . . . . .
+## 4 . . . X . . .  <- X marks true center (4D)
+## 5 . . . . . . .
+## 6 . . . . . . .
+## 7 . . . . . . .
 ###############################################
 
 class WiFiQRGenerator:
     def __init__(self):
-        self.grid_rows = ['1', '2', '3', '4', '5']
-        self.grid_cols = ['A', 'B', 'C', 'D', 'E', 'F']
+        self.grid_rows = ['1', '2', '3', '4', '5', '6', '7']
+        self.grid_cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G']
         self.default_qr_size = 325
         self.default_margin = 30
     
     def display_grid_help(self):
         """Display the grid system explanation"""
         print("\n" + "="*50)
-        print("POSITIONING GRID SYSTEM")
+        print("POSITIONING GRID SYSTEM (7x7 - TRUE CENTER)")
         print("="*50)
         print("Grid Layout:")
-        print("  A B C D E F")
-        for row in self.grid_rows:
-            print(f"{row} . . . . . .")
-        print("\nExamples:")
+        print("  A B C D E F G")
+        for i, row in enumerate(self.grid_rows):
+            if row == '4':
+                print(f"{row} . . . X . . .  <- TRUE CENTER (4D)")
+            else:
+                print(f"{row} . . . . . . .")
+        print("\nCorner Examples:")
         print("  1A = Top-Left Corner")
-        print("  1F = Top-Right Corner") 
-        print("  5A = Bottom-Left Corner")
-        print("  5F = Bottom-Right Corner")
-        print("  3C = Center-Left")
-        print("  3D = Center-Right")
-        print("  2D = Upper-Center")
-        print("  4D = Lower-Center")
+        print("  1G = Top-Right Corner") 
+        print("  7A = Bottom-Left Corner")
+        print("  7G = Bottom-Right Corner")
+        print("\nCenter Examples:")
+        print("  4D = TRUE CENTER")
+        print("  4A = Center-Left Edge")
+        print("  4G = Center-Right Edge")
+        print("  1D = Top-Center Edge")
+        print("  7D = Bottom-Center Edge")
+        print("\nQuadrant Centers:")
+        print("  2B = Upper-Left Quadrant")
+        print("  2F = Upper-Right Quadrant")
+        print("  6B = Lower-Left Quadrant") 
+        print("  6F = Lower-Right Quadrant")
         print("="*50)
     
     def prompt_with_default(self, prompt, default):
@@ -60,7 +72,7 @@ class WiFiQRGenerator:
         return user_input if user_input else default
     
     def validate_grid_position(self, position):
-        """Validate grid position input (e.g., '1A', '4D')"""
+        """Validate grid position input (e.g., '1A', '4D', '7G')"""
         if len(position) != 2:
             return False
         row, col = position[0].upper(), position[1].upper()
@@ -78,7 +90,7 @@ class WiFiQRGenerator:
         effective_width = img_width - (2 * self.default_margin) - qr_width
         effective_height = img_height - (2 * self.default_margin) - qr_height
         
-        # Grid cell dimensions
+        # Grid cell dimensions (6 intervals for 7 positions)
         cell_width = effective_width / (len(self.grid_cols) - 1) if len(self.grid_cols) > 1 else 0
         cell_height = effective_height / (len(self.grid_rows) - 1) if len(self.grid_rows) > 1 else 0
         
@@ -172,7 +184,7 @@ class WiFiQRGenerator:
         
         # Get grid position
         while True:
-            position_input = input("Enter grid position (1A-5F) or 'help' for grid info: ").strip()
+            position_input = input("Enter grid position (1A-7G) or 'help' for grid info: ").strip()
             
             if position_input.lower() == 'help':
                 self.display_grid_help()
@@ -182,7 +194,7 @@ class WiFiQRGenerator:
                 grid_position = position_input.upper()
                 break
             else:
-                print("Invalid position! Please enter a valid grid position (e.g., '1A', '3D', '5F')")
+                print("Invalid position! Please enter a valid grid position (e.g., '1A', '4D', '7G')")
         
         return self.generate_qr_image(ssid, encryption, password, image_path, output_path, grid_position, qr_size)
     
@@ -208,13 +220,13 @@ class WiFiQRGenerator:
             return False
 
 def main():
-    parser = argparse.ArgumentParser(description='WiFi QR Code Generator with Grid Positioning')
+    parser = argparse.ArgumentParser(description='WiFi QR Code Generator with 7x7 Grid Positioning')
     parser.add_argument('--ssid', help='WiFi SSID')
     parser.add_argument('--password', help='WiFi password')
     parser.add_argument('--encryption', default='WPA', help='Encryption type (default: WPA)')
     parser.add_argument('--input', help='Input background image path')
     parser.add_argument('--output', help='Output image path')
-    parser.add_argument('--position', help='Grid position (1A-5F)')
+    parser.add_argument('--position', help='Grid position (1A-7G)')
     parser.add_argument('--size', type=int, help='QR code size in pixels')
     parser.add_argument('--help-grid', action='store_true', help='Show grid positioning help')
     
