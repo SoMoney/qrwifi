@@ -1,12 +1,12 @@
 # QRwifi
 
-A Python script that generates a WiFi QR join codes and overlays them onto background images using an intuitive grid positioning system.
+A Python script that generates a WiFi QR join code and overlays it onto the background image of your choice.
 
 ## Features
 
 - Generate WiFi QR codes for easy network sharing
 - Overlay QR codes on custom background images
-- Grid-based positioning system (5x6 grid: 1A-5F)
+- Grid-based positioning system (7x7 grid: 1A-7G)
 - Customizable QR code size
 - Both interactive and command-line modes
 - Support for various WiFi encryption types (WPA, WEP, etc.)
@@ -33,7 +33,7 @@ The script uses a 5x6 grid system for positioning QR codes on your background im
 1 . . . . . . .
 2 . . . . . . .
 3 . . . . . . .
-4 . . . . . . .
+4 . . . X . . .  <- X marks true center (4D)
 5 . . . . . . .
 6 . . . . . . .
 7 . . . . . . .

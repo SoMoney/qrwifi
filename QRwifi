@@ -3,7 +3,7 @@
 Package: QRwifi
 Version: 1.0.3
 Author: Michael Zietlow
-Description: Python script which places a QRCODE over an image.
+Description: Python script which generates a Wifi Join QRCODE over an image.
 """
 
 import qrcode
@@ -33,7 +33,7 @@ class WiFiQRGenerator:
     def __init__(self):
         self.grid_rows = ['1', '2', '3', '4', '5', '6', '7']
         self.grid_cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G']
-        self.default_qr_size = 325
+        self.default_qr_size = 300
         self.default_margin = 30
     
     def display_grid_help(self):
