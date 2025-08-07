@@ -29,21 +29,22 @@ pip install qrcode Pillow
 The script uses a 5x6 grid system for positioning QR codes on your background image:
 
 ```
-  A B C D E F
-1 . . . . . .
-2 . . . . . .
-3 . . . . . .
-4 . . . . . .
-5 . . . . . .
+  A B C D E F G
+1 . . . . . . .
+2 . . . . . . .
+3 . . . . . . .
+4 . . . . . . .
+5 . . . . . . .
+6 . . . . . . .
+7 . . . . . . .
 ```
 
 ### Position Examples:
 - `1A` = Top-Left Corner
-- `1F` = Top-Right Corner
-- `5A` = Bottom-Left Corner
-- `5F` = Bottom-Right Corner
-- `3C` = Center-Left
-- `3D` = Center-Right
+- `1G` = Top-Right Corner
+- `4D` = True Center
+- `7A` = Bottom-Left Corner
+- `7G` = Bottom-Right Corner
 
 ## Usage
 
@@ -122,6 +123,8 @@ The script includes comprehensive error handling for:
 
 ## Version History
 
+- **1.0.3** - Made Grid Larger, added true center
+- **1.0.2** - Added a Grid System
 - **1.0.1** - Current version with grid positioning system
 - **1.0.0** - Initial release
 
