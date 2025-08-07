@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
 Package: QRwifi
-Version: 1.0.1
+Version: 1.0.2
 AUthor: Michael Zietlow
-Description: A Python script that generates WiFi QR codes and overlays them onto background images
+Description: Python script which places a QRCODE over an image.
 """
 
 import qrcode
@@ -14,18 +14,17 @@ import argparse
 
 ###############################################
 ## Script: WIFI QR IMAGE GENERATOR WITH GRID OVERLAY
-## Author: Michael Zietlow (Enhanced Version)
-##
 ## <Ubuntu Prerequisites>
 ## sudo apt install -y python3 python3-pip python3-venv
 ## pip install qrcode Pillow
 ##
 ## Grid System:
-## 1ABCDEF
-## 2ABCDEF  
-## 3ABCDEF
-## 4ABCDEF
-## 5ABCDEF
+##   A B C D E F
+## 1 . . . . . .
+## 2 . . . . . .
+## 3 . . . . . .
+## 4 . . . . . .
+## 5 . . . . . .
 ###############################################
 
 class WiFiQRGenerator:
