@@ -1,0 +1,259 @@
+#!/usr/bin/env python3
+"""
+Package: QRwifi
+Version: 1.0.1
+AUthor: Michael Zietlow
+Description: A Python script that generates WiFi QR codes and overlays them onto background images
+"""
+
+import qrcode
+from PIL import Image
+import os
+import sys
+import argparse
+
+###############################################
+## Script: WIFI QR IMAGE GENERATOR WITH GRID OVERLAY
+## Author: Michael Zietlow (Enhanced Version)
+##
+## <Ubuntu Prerequisites>
+## sudo apt install -y python3 python3-pip python3-venv
+## pip install qrcode Pillow
+##
+## Grid System:
+## 1ABCDEF
+## 2ABCDEF  
+## 3ABCDEF
+## 4ABCDEF
+## 5ABCDEF
+###############################################
+
+class WiFiQRGenerator:
+    def __init__(self):
+        self.grid_rows = ['1', '2', '3', '4', '5']
+        self.grid_cols = ['A', 'B', 'C', 'D', 'E', 'F']
+        self.default_qr_size = 325
+        self.default_margin = 30
+    
+    def display_grid_help(self):
+        """Display the grid system explanation"""
+        print("\n" + "="*50)
+        print("POSITIONING GRID SYSTEM")
+        print("="*50)
+        print("Grid Layout:")
+        print("  A B C D E F")
+        for row in self.grid_rows:
+            print(f"{row} . . . . . .")
+        print("\nExamples:")
+        print("  1A = Top-Left Corner")
+        print("  1F = Top-Right Corner") 
+        print("  5A = Bottom-Left Corner")
+        print("  5F = Bottom-Right Corner")
+        print("  3C = Center-Left")
+        print("  3D = Center-Right")
+        print("  2D = Upper-Center")
+        print("  4D = Lower-Center")
+        print("="*50)
+    
+    def prompt_with_default(self, prompt, default):
+        """Prompt for input with a default value"""
+        user_input = input(f"{prompt} [{default}]: ").strip()
+        return user_input if user_input else default
+    
+    def validate_grid_position(self, position):
+        """Validate grid position input (e.g., '1A', '4D')"""
+        if len(position) != 2:
+            return False
+        row, col = position[0].upper(), position[1].upper()
+        return row in self.grid_rows and col in self.grid_cols
+    
+    def calculate_position_from_grid(self, base_img, qr_img, grid_position):
+        """Calculate pixel coordinates from grid position"""
+        row, col = grid_position[0].upper(), grid_position[1].upper()
+        
+        # Calculate grid cell dimensions
+        img_width, img_height = base_img.size
+        qr_width, qr_height = qr_img.size
+        
+        # Effective area (accounting for margins)
+        effective_width = img_width - (2 * self.default_margin) - qr_width
+        effective_height = img_height - (2 * self.default_margin) - qr_height
+        
+        # Grid cell dimensions
+        cell_width = effective_width / (len(self.grid_cols) - 1) if len(self.grid_cols) > 1 else 0
+        cell_height = effective_height / (len(self.grid_rows) - 1) if len(self.grid_rows) > 1 else 0
+        
+        # Calculate position based on grid
+        row_index = self.grid_rows.index(row)
+        col_index = self.grid_cols.index(col)
+        
+        x = self.default_margin + int(col_index * cell_width)
+        y = self.default_margin + int(row_index * cell_height)
+        
+        # Ensure QR code stays within image boundaries
+        x = max(0, min(x, img_width - qr_width))
+        y = max(0, min(y, img_height - qr_height))
+        
+        return (x, y)
+    
+    def create_wifi_qr(self, encryption, ssid, password, qr_size=None):
+        """Create a QR code for WiFi connection"""
+        if qr_size is None:
+            qr_size = self.default_qr_size
+            
+        wifi_config = f"WIFI:T:{encryption};S:{ssid};P:{password};;"
+        qr = qrcode.QRCode(
+            version=1,
+            error_correction=qrcode.constants.ERROR_CORRECT_L,
+            box_size=10,
+            border=1,
+        )
+        qr.add_data(wifi_config)
+        qr.make(fit=True)
+        
+        # Create QR image with customizable colors
+        img = qr.make_image(fill='black', back_color='white')
+        img = img.resize((qr_size, qr_size))
+        return img
+    
+    def place_qr_on_image(self, image_path, qr_img, output_path, grid_position):
+        """Place the QR code onto an image at the specified grid position"""
+        try:
+            if not os.path.exists(image_path):
+                raise FileNotFoundError(f"Input image '{image_path}' not found!")
+                
+            base_img = Image.open(image_path).convert('RGBA')
+            qr_img = qr_img.convert('RGBA')
+            
+            # Calculate position from grid
+            position = self.calculate_position_from_grid(base_img, qr_img, grid_position)
+            
+            print(f"Placing QR code at grid position {grid_position.upper()} -> pixel coordinates {position}")
+            
+            # Paste QR code with transparency support
+            base_img.paste(qr_img, position, qr_img)
+            
+            # Ensure output directory exists
+            output_dir = os.path.dirname(output_path)
+            if output_dir and not os.path.exists(output_dir):
+                os.makedirs(output_dir)
+                
+            # Convert back to RGB if saving as JPEG
+            if output_path.lower().endswith(('.jpg', '.jpeg')):
+                base_img = base_img.convert('RGB')
+                
+            base_img.save(output_path)
+            return True
+            
+        except Exception as e:
+            print(f"\nError processing image: {str(e)}")
+            return False
+    
+    def interactive_mode(self):
+        """Run in interactive mode with prompts"""
+        print("WiFi QR Code Generator - Interactive Mode")
+        print("Type 'help' for grid positioning help")
+        
+        # Get WiFi credentials
+        ssid = self.prompt_with_default("Enter SSID", "MyWiFi")
+        encryption = self.prompt_with_default("Enter encryption type", "WPA").upper()
+        password = self.prompt_with_default("Enter password", "mypassword")
+        
+        # Get file paths
+        image_path = self.prompt_with_default("Enter input image path", "background.png")
+        output_path = self.prompt_with_default("Enter output path", "wifi_qr_output.png")
+        
+        # Get QR code size
+        qr_size_input = self.prompt_with_default("Enter QR code size in pixels", str(self.default_qr_size))
+        try:
+            qr_size = int(qr_size_input)
+        except ValueError:
+            qr_size = self.default_qr_size
+            print(f"Invalid size, using default: {qr_size}")
+        
+        # Get grid position
+        while True:
+            position_input = input("Enter grid position (1A-5F) or 'help' for grid info: ").strip()
+            
+            if position_input.lower() == 'help':
+                self.display_grid_help()
+                continue
+                
+            if self.validate_grid_position(position_input):
+                grid_position = position_input.upper()
+                break
+            else:
+                print("Invalid position! Please enter a valid grid position (e.g., '1A', '3D', '5F')")
+        
+        return self.generate_qr_image(ssid, encryption, password, image_path, output_path, grid_position, qr_size)
+    
+    def generate_qr_image(self, ssid, encryption, password, image_path, output_path, grid_position, qr_size=None):
+        """Generate the QR code and place it on the image"""
+        print(f"\nGenerating WiFi QR Code:")
+        print(f"  SSID: {ssid}")
+        print(f"  Encryption: {encryption}")
+        print(f"  Input Image: {image_path}")
+        print(f"  Output: {output_path}")
+        print(f"  Grid Position: {grid_position}")
+        print(f"  QR Size: {qr_size or self.default_qr_size}px")
+        
+        # Create QR code
+        qr_img = self.create_wifi_qr(encryption, ssid, password, qr_size)
+        
+        # Place on image
+        if self.place_qr_on_image(image_path, qr_img, output_path, grid_position):
+            print(f"\n✅ Success! QR code saved as: {output_path}")
+            return True
+        else:
+            print("\n❌ Failed to generate QR code image")
+            return False
+
+def main():
+    parser = argparse.ArgumentParser(description='WiFi QR Code Generator with Grid Positioning')
+    parser.add_argument('--ssid', help='WiFi SSID')
+    parser.add_argument('--password', help='WiFi password')
+    parser.add_argument('--encryption', default='WPA', help='Encryption type (default: WPA)')
+    parser.add_argument('--input', help='Input background image path')
+    parser.add_argument('--output', help='Output image path')
+    parser.add_argument('--position', help='Grid position (1A-5F)')
+    parser.add_argument('--size', type=int, help='QR code size in pixels')
+    parser.add_argument('--help-grid', action='store_true', help='Show grid positioning help')
+    
+    args = parser.parse_args()
+    generator = WiFiQRGenerator()
+    
+    # Show grid help if requested
+    if args.help_grid:
+        generator.display_grid_help()
+        return
+    
+    # Check if all required arguments are provided for non-interactive mode
+    if all([args.ssid, args.password, args.input, args.output, args.position]):
+        # Non-interactive mode
+        if not generator.validate_grid_position(args.position):
+            print("Error: Invalid grid position. Use --help-grid to see valid positions.")
+            sys.exit(1)
+            
+        success = generator.generate_qr_image(
+            args.ssid, 
+            args.encryption, 
+            args.password, 
+            args.input, 
+            args.output, 
+            args.position.upper(),
+            args.size
+        )
+        sys.exit(0 if success else 1)
+    else:
+        # Interactive mode
+        try:
+            generator.interactive_mode()
+        except KeyboardInterrupt:
+            print("\n\nOperation cancelled by user.")
+            sys.exit(0)
+        except Exception as e:
+            print(f"\nUnexpected error: {str(e)}")
+            sys.exit(1)
+
+if __name__ == "__main__":
+    main()
