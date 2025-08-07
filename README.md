@@ -1,6 +1,6 @@
 # QRwifi
 
-A Python script that generates WiFi QR codes and overlays them onto background images using an intuitive grid positioning system.
+A Python script that generates a WiFi QR join codes and overlays them onto background images using an intuitive grid positioning system.
 
 ## Features
 
