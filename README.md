@@ -1,6 +1,18 @@
 # QRwifi
+<table>
+  <tr>
+    <td style="text-align: center; vertical-align: middle; padding: 0;">
+      <img src="https://github.com/SoMoney/qrwifi/blob/main/QRwifi/images/logo_qrwifi.jpeg" alt="QRwifi Logo" width="256" height="256"/>
+    </td>
+    <td style="text-align: center; vertical-align: middle; padding: 10px;">
+      <div style="display: flex; flex-direction: column; justify-content: center; height: 256px;">
+        <h1 style="font-size: 64px; font-weight: bold; margin: 0;">QRwifi v1.0.3</h1>
+        <p style="font-size: 16px; margin: 10px 0 0 0;">A Python script that generates a WiFi QR join code and overlays it onto the background image of your choice.</p>
+      </div>
+    </td>
+  </tr>
+</table>
 
-A Python script that generates a WiFi QR join code and overlays it onto the background image of your choice.
 
 ## Features
 
